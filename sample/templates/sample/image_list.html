@@ -1,0 +1,5 @@
+{% load thumbor_tags %}
+
+{% for img in object_list %}
+<img src="{% thumbor_url img.image.file.name width=300 %}" width="300" />
+{% endfor %}

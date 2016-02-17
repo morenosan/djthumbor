@@ -1,0 +1,36 @@
+thumbor:
+  #image: apsl/thumbor:latest
+  build: thumbor
+  volumes:
+    - ./data:/data
+    - ./logs:/logs
+  ports:
+    - "80:8000" # thumbor port
+  environment:
+    SECURITY_KEY: SECURIZE_ME
+    DETECTORS: "['thumbor.detectors.feature_detector','thumbor.detectors.face_detector',]"
+    AWS_ACCESS_KEY_ID:  # put your AWS_ACCESS_KEY_ID here
+    AWS_SECRET_ACCESS_KEY:  # put your AWS_SECRET_ACCESS_KEY here
+    TC_AWS_STORAGE_BUCKET: thumbor-docker
+    TC_AWS_STORAGE_ROOT_PATH: storage
+    TC_AWS_RESULT_STORAGE_BUCKET: thumbor-docker
+    TC_AWS_RESULT_STORAGE_ROOT_PATH: result_storage
+    STORAGE: tc_aws.storages.s3_storage
+    UPLOAD_PHOTO_STORAGE: tc_aws.storages.s3_storage
+    RESULT_STORAGE: thumbor.result_storages.file_storage
+  links:
+    - fakes3ssl:thumbor-docker.s3.amazonaws.com
+fakes3:
+  image: lphoward/fake-s3
+  ports:
+    - "4569:4569"
+  volumes:
+    - ./fakes3_root:/fakes3_root
+fakes3ssl:
+  image: cbachich/docker-ssl-proxy
+  ports:
+    - "443:443"
+  links:
+    - fakes3:proxyapp
+  environment:
+    - TARGET_PORT=4569
